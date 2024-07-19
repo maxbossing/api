@@ -287,3 +287,4 @@ server/
 # Environment Files
 
 config.toml
+test.db
