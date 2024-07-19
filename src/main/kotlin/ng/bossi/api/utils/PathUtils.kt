@@ -1,11 +1,9 @@
 package ng.bossi.api.utils
 
-import com.akuleshov7.ktoml.Toml
 import kotlinx.serialization.*
-import org.apache.logging.log4j.Logger
+import org.slf4j.Logger
 import java.nio.file.Path
 import kotlin.io.path.*
-import kotlin.math.log
 
 /**
  * Load a @[Serializable] [Any] from a [Path], overwriting it with [default] if not existing or errors happen during serialization

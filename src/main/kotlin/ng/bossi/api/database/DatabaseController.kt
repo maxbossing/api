@@ -5,25 +5,29 @@ import com.zaxxer.hikari.HikariDataSource
 import ng.bossi.api.config.ConfigController
 import ng.bossi.api.database.model.*
 import ng.bossi.api.database.service.*
-import org.apache.logging.log4j.LogManager
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.slf4j.LoggerFactory
+import java.util.logging.Logger
+import kotlin.math.log
 import kotlin.system.exitProcess
 
 object DatabaseController {
-  private val logger = LogManager.getLogger(DatabaseController::class)
 
   private val config = ConfigController.config.databaseConfig
+  private val logger = LoggerFactory.getLogger(DatabaseController::class.java)
 
   private val db by lazy {
     Database.connect(
       datasource = HikariDataSource(
         HikariConfig().apply {
-          jdbcUrl = "jdbc:postgresql://${config.host}:${config.port}/${config.database}"
-          driverClassName = "org.postgresql.Driver"
-          username = config.database
-          password = config.database
+          //jdbcUrl = "jdbc:postgresql://${config.host}:${config.port}/${config.database}"
+          //driverClassName = "org.postgresql.Driver"
+          //username = config.database
+          //password = config.database
+          jdbcUrl = "jdbc:sqlite:test.db"
+          driverClassName = "org.sqlite.JDBC"
           maximumPoolSize = 3
           isReadOnly = false
         }
@@ -62,7 +66,7 @@ object DatabaseController {
 
     logger.info("Creating Schema...")
     transaction {
-      SchemaUtils.create(Applications, FeatureFlags, Resources, SingleLicenses, Versions, inBatch = true)
+      SchemaUtils.create(Applications, FeatureFlags, Resources, SingleLicenses, Versions)
     }
 
     logger.info("Loading Application Service...")

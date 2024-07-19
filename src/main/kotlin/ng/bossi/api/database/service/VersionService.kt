@@ -2,6 +2,7 @@ package ng.bossi.api.database.service
 
 import ng.bossi.api.database.model.*
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.transaction
 
 class VersionService(val database: Database) : IDatabaseService<Long, Version> {
   override suspend fun create(entity: Version): Long = dbQuery {
@@ -14,7 +15,8 @@ class VersionService(val database: Database) : IDatabaseService<Long, Version> {
     }[Versions.id]
   }
 
-  override suspend fun read(id: Long): Version? = dbQuery {
+  override suspend fun read(id: Long): Version? = dbQuery { transaction ->
+    transaction.addLogger(StdOutSqlLogger)
     (Versions innerJoin Applications innerJoin Resources)
       .selectAll()
       .where { Versions.id eq id }

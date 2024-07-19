@@ -1,7 +1,9 @@
 package ng.bossi.api.database.service
 
-import ng.bossi.api.database.model.Applications
-import ng.bossi.api.database.model.Application
+import ng.bossi.api.database.DatabaseController
+import ng.bossi.api.database.model.*
+import ng.bossi.api.logger
+import ng.bossi.api.signing.ResponseSigning
 import org.jetbrains.exposed.sql.*
 
 class ApplicationService(val database: Database): IDatabaseService<Long, Application> {
@@ -20,13 +22,36 @@ class ApplicationService(val database: Database): IDatabaseService<Long, Applica
   }
 
   override suspend fun update(id: Long, entity: Application): Boolean = dbQuery {
-    Applications.update({ Applications.id eq id }) {
+    val successful = Applications.update({ Applications.id eq id }) {
       it[name] = entity.name
       it[key] = entity.key
     } > 0
+
+    ResponseSigning.keyCache.invalidate(id)
+
+    successful
   }
 
   override suspend fun delete(id: Long): Boolean = dbQuery {
-      Applications.deleteWhere { Op.build { Applications.id eq id } } > 0
+    val successful = Applications.deleteWhere { Op.build { Applications.id eq id } } > 0
+    ResponseSigning.keyCache.invalidate(id)
+    successful
+
   }
+
+  suspend fun getVersions(id: Long): List<Version> = dbQuery {
+    (Applications innerJoin Versions).selectAll()
+      .where { Applications.id eq id }
+      .mapNotNull { DatabaseController.versionService.read(it[Versions.id]) }
+  }
+  
+  suspend fun getCurrentVersion(id: Long): Version? = dbQuery { transaction ->
+    transaction.addLogger(StdOutSqlLogger)
+    (Applications innerJoin Versions)
+      .select(Versions.id)
+      .where { (Applications.id eq id) and (Versions.status eq VersionStatus.CURRENT) }
+      .map { DatabaseController.versionService.read(it[Versions.id]).also { println(it) } }
+      .singleOrNull()
+  }
+
 }
