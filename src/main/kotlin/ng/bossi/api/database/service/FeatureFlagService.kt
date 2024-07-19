@@ -39,4 +39,9 @@ class FeatureFlagService(val database: Database) : IDatabaseService<Long, Featur
     FeatureFlags.deleteWhere { Op.build { FeatureFlags.id eq id } } > 0
   }
 
+
+  suspend fun nameToId(name: String): Long? = dbQuery {
+    FeatureFlags.select(FeatureFlags.id).where { FeatureFlags.name eq name}.singleOrNull()?.get(FeatureFlags.id)
+  }
+
 }

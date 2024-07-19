@@ -286,5 +286,7 @@ server/
 
 # Environment Files
 
+.gradle/
+
 config.toml
 test.db

@@ -11,13 +11,74 @@ fun Routing.initRoutes() {
   get("/helloworld") {
     call.respondText("Hello World!")
   }
-  get("application/{id}/versions") {
-    val id = call.parameters["id"]?.toLong() ?: throw IllegalArgumentException("Invalid ID")
-    val version = DatabaseController.applicationService.getCurrentVersion(id)
+
+  get("application/{applicationId}/versions") {
+    val applicationId = call.parameters["applicationId"]?.toLong()
+
+    if (applicationId == null) {
+      call.respond(HttpStatusCode.BadRequest, "Invalid ApplicationId")
+      return@get
+    }
+
+    val version = DatabaseController.applicationService.getCurrentVersion(applicationId)
+
     if (version == null) {
       call.respond(HttpStatusCode.NotFound, "No Current Version found!")
-    } else {
-      call.respond<SignedVersionResponse>(version.sign(id)!!)
+      return@get
     }
+
+    call.respond<SignedVersionResponse>(version.sign(applicationId)!!)
+  }
+
+  get("application/{applicationID}/versions/{versionId}") {
+    val applicationId = call.parameters["applicationId"]?.toLong()
+
+    if (applicationId == null) {
+      call.respond(HttpStatusCode.BadRequest, "Invalid ApplicationId!")
+      return@get
+    }
+
+    val versionId = call.parameters["versionId"]?.toLong()
+
+    if (versionId == null) {
+      call.respond(HttpStatusCode.BadRequest, "Invalid VersionId!")
+      return@get
+    }
+
+    val version = DatabaseController.versionService.read(versionId)
+
+    if (version == null) {
+      call.respond(HttpStatusCode.NotFound, "No Version found!")
+      return@get
+    }
+
+    call.respond<SignedVersionResponse>(version.sign(applicationId)!!)
+  }
+
+  get("application/{applicationId}/featureFlags/{featureFlag}") {
+    val applicationId = call.parameters["applicationId"]?.toLong()
+
+    if (applicationId == null) {
+      call.respond(HttpStatusCode.BadRequest, "Invalid ApplicationId!")
+      return@get
+    }
+
+    val featureFlagp = call.parameters["featureFlag"]
+
+    if (featureFlagp == null) {
+      call.respond(HttpStatusCode.BadRequest, "Invalid FeatureFlag!")
+      return@get
+    }
+
+    val featureFlagId = DatabaseController.featureFlagService.nameToId(featureFlagp)
+
+    if (featureFlagId == null) {
+      call.respond(HttpStatusCode.NotFound, "Feature flag does not exist!")
+      return@get
+    }
+
+    val featureFlag = DatabaseController.featureFlagService.read(featureFlagId)!!
+
+    call.respond(featureFlag.sign(applicationId)!!)
   }
 }
