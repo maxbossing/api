@@ -25,9 +25,10 @@ inline fun <reified T : @Serializable Any> Path.loadData(default: T, stringForma
     writeText(stringFormat.encodeToString(default))
     default
   } else try {
+    logger.info("Loading $fileName...")
     stringFormat.decodeFromString<T>(readText())
   } catch (_: Exception) {
-    logger.warn("Failed to read $fileName, resetting file...")
+    logger.warn("Failed to load $fileName, resetting file...")
     writeText(stringFormat.encodeToString(default))
     default
   }

@@ -1,7 +1,7 @@
-package ng.bossi.api.data.database.service
+package ng.bossi.api.database.service
 
-import ng.bossi.api.data.database.model.Resource
-import ng.bossi.api.data.database.model.Resources
+import ng.bossi.api.database.model.Resource
+import ng.bossi.api.database.model.Resources
 import org.jetbrains.exposed.sql.*
 
 class ResourceService(val database: Database) : IDatabaseService<Long, Resource> {

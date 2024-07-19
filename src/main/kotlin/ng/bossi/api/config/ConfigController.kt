@@ -1,6 +1,6 @@
-package ng.bossi.api.data.config
+package ng.bossi.api.config
 
-import com.akuleshov7.ktoml.Toml
+import ng.bossi.api.LOGGER
 import ng.bossi.api.utils.loadData
 import ng.bossi.api.utils.toml
 import org.apache.logging.log4j.LogManager
@@ -10,5 +10,10 @@ object ConfigController {
   private val configPath = Path("config.toml")
   private val logger = LogManager.getLogger(ConfigController::class)
 
-  val config = configPath.loadData<APIConfig>(APIConfig(), toml, logger)
+  val config by lazy { configPath.loadData<APIConfig>(APIConfig(), toml, logger) }
+
+  init {
+    LOGGER.info("Initializing config...")
+    config
+  }
 }

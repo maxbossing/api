@@ -1,6 +1,6 @@
-package ng.bossi.api.data.database.service
+package ng.bossi.api.database.service
 
-import ng.bossi.api.data.database.model.*
+import ng.bossi.api.database.model.*
 import org.jetbrains.exposed.sql.*
 
 class VersionService(val database: Database) : IDatabaseService<Long, Version> {

@@ -1,8 +1,8 @@
-package ng.bossi.api.data.database.service
+package ng.bossi.api.database.service
 
-import ng.bossi.api.data.database.model.Applications
-import ng.bossi.api.data.database.model.FeatureFlag
-import ng.bossi.api.data.database.model.FeatureFlags
+import ng.bossi.api.database.model.Applications
+import ng.bossi.api.database.model.FeatureFlag
+import ng.bossi.api.database.model.FeatureFlags
 import org.jetbrains.exposed.sql.*
 
 class FeatureFlagService(val database: Database) : IDatabaseService<Long, FeatureFlag> {

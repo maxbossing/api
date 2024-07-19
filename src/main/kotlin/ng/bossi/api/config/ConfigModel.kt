@@ -1,4 +1,4 @@
-package ng.bossi.api.data.config
+package ng.bossi.api.config
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

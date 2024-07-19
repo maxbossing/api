@@ -1,4 +1,4 @@
-package ng.bossi.api.data.database.service
+package ng.bossi.api.database.service
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable

@@ -1,7 +1,7 @@
-package ng.bossi.api.data.database.service
+package ng.bossi.api.database.service
 
-import ng.bossi.api.data.database.model.Applications
-import ng.bossi.api.data.database.model.Application
+import ng.bossi.api.database.model.Applications
+import ng.bossi.api.database.model.Application
 import org.jetbrains.exposed.sql.*
 
 class ApplicationService(val database: Database): IDatabaseService<Long, Application> {

@@ -1,9 +1,10 @@
-package ng.bossi.api.data.database
+package ng.bossi.api.database
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import ng.bossi.api.data.config.ConfigController
-import ng.bossi.api.data.database.model.*
+import ng.bossi.api.config.ConfigController
+import ng.bossi.api.database.model.*
+import ng.bossi.api.database.service.*
 import org.apache.logging.log4j.LogManager
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -30,6 +31,11 @@ object DatabaseController {
     )
   }
 
+  val applicationService by lazy { ApplicationService(db) }
+  val featureFlagService by lazy { FeatureFlagService(db) }
+  val resourceService by lazy { ResourceService(db) }
+  val singleLicenseService by lazy { SingleLicenseService(db) }
+  val versionService by lazy { VersionService(db) }
 
   init {
     logger.info("Initializing database...")
@@ -53,14 +59,26 @@ object DatabaseController {
 
     logger.info("Trying to connect...")
     db
-    logger.info("Connected to database!")
 
     logger.info("Creating Schema...")
     transaction {
       SchemaUtils.create(Applications, FeatureFlags, Resources, SingleLicenses, Versions, inBatch = true)
     }
-    logger.info("Created Schema!")
 
+    logger.info("Loading Application Service...")
+    applicationService
 
+    logger.info("Loading Feature Flag Service...")
+    featureFlagService
+
+    logger.info("Loading Resource Service...")
+    resourceService
+
+    logger.info("Loading Single License Service...")
+    singleLicenseService
+
+    logger.info("Loading Version Service...")
+    versionService
   }
+
 }

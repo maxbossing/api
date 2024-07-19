@@ -1,4 +1,4 @@
-package ng.bossi.api.data.database.model
+package ng.bossi.api.database.model
 
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.Column

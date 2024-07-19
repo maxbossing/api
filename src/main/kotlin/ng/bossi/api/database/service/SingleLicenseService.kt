@@ -1,8 +1,8 @@
-package ng.bossi.api.data.database.service
+package ng.bossi.api.database.service
 
-import ng.bossi.api.data.database.model.Applications
-import ng.bossi.api.data.database.model.SingleLicense
-import ng.bossi.api.data.database.model.SingleLicenses
+import ng.bossi.api.database.model.Applications
+import ng.bossi.api.database.model.SingleLicense
+import ng.bossi.api.database.model.SingleLicenses
 import org.jetbrains.exposed.sql.*
 
 class SingleLicenseService(val database: Database): IDatabaseService<Long, SingleLicense> {
