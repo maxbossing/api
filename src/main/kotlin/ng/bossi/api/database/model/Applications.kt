@@ -29,7 +29,7 @@ data class Application(val name: String, val key: ByteArray) {
 object Applications : Table() {
   val id: Column<Long> = long("id").autoIncrement()
   val name: Column<String> = varchar("name", 255)
-  val key: Column<ByteArray> = binary("privateKey", 256)
+  val key: Column<ByteArray> = binary("privateKey", 1701)
 
   override val primaryKey: PrimaryKey = PrimaryKey(id, name = "applicationId")
 }
