@@ -6,13 +6,10 @@ import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
-import io.ktor.util.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import ng.bossi.api.config.ConfigController
 import ng.bossi.api.database.DatabaseController
-import ng.bossi.api.database.model.*
-import ng.bossi.api.database.model.Application
 import ng.bossi.api.http.initRoutes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,8 +18,7 @@ val logger: Logger = LoggerFactory.getLogger("API")
 
 lateinit var ktorServer: ApplicationEngine
 
-@Suppress("unused")
-suspend fun main(args: Array<String>) = coroutineScope {
+suspend fun main() = coroutineScope {
 
     logger.info("Starting API...")
 
