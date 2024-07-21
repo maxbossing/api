@@ -39,7 +39,7 @@
       - /{licenseId}
         - returns license object, signed
 /resources/resourceId
-  - returns resource object, signed
+  - returns resource object
   - /download
     - rewrites to resource objects download url 
 ```
