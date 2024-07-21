@@ -5,8 +5,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.encodeToString
 import ng.bossi.api.database.DatabaseController
-import ng.bossi.api.database.model.Version
-import ng.bossi.api.database.model.Versions
 import java.security.KeyFactory
 import java.security.PrivateKey
 import java.security.Signature
@@ -33,10 +31,17 @@ object ResponseSigning {
   }
 
   @Serializable
-  abstract class SignableResponse { abstract var sign: String }
+  abstract class SignableResponse {
+    abstract var sign: String
+  }
 
   @OptIn(ExperimentalEncodingApi::class)
-  suspend inline fun <reified I: @Serializable Any, O : @Serializable SignableResponse, E: StringFormat> signAsResponse(application: Long, input: I, output: O, stringFormat: E): O? {
+  suspend inline fun <reified I : @Serializable Any, O : @Serializable SignableResponse, E : StringFormat> signAsResponse(
+    application: Long,
+    input: I,
+    output: O,
+    stringFormat: E
+  ): O? {
     val signature: Signature = Signature.getInstance("SHA256withRSA")
     signature.initSign(keyCache.get(application))
     signature.update(stringFormat.encodeToString(input).encodeToByteArray())

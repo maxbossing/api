@@ -101,7 +101,7 @@ fun Routing.initRoutes() {
     call.respond(resource)
   }
 
-  get ("resources/{resourceId}/download") {
+  get("resources/{resourceId}/download") {
     val resourceId = call.parameters["resourceId"]?.toLong()
     if (resourceId == null) {
       call.respond(HttpStatusCode.BadRequest, "Invalid Resource ID!")

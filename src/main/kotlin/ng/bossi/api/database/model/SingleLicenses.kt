@@ -10,7 +10,13 @@ import org.jetbrains.exposed.sql.Table
 @Serializable
 data class SingleLicense(val application: Long, val status: SingleLicenseStatus) {
   fun signable(): SignedSingleLicenseResponse = SignedSingleLicenseResponse(application, status, "")
-  suspend fun sign(application: Long): SignedSingleLicenseResponse? = ResponseSigning.signAsResponse<SingleLicense, SignedSingleLicenseResponse, Json>(application, this, signable(), json)
+  suspend fun sign(application: Long): SignedSingleLicenseResponse? =
+    ResponseSigning.signAsResponse<SingleLicense, SignedSingleLicenseResponse, Json>(
+      application,
+      this,
+      signable(),
+      json
+    )
 }
 
 @Serializable
@@ -18,7 +24,7 @@ data class SignedSingleLicenseResponse(
   val application: Long,
   val status: SingleLicenseStatus,
   override var sign: String
-): ResponseSigning.SignableResponse()
+) : ResponseSigning.SignableResponse()
 
 enum class SingleLicenseStatus { ENABLED, DISABLED, PAUSED }
 

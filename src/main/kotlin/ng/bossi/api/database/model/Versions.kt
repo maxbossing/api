@@ -16,7 +16,8 @@ data class Version(
   val resource: Long
 ) {
   fun signable(): SignedVersionResponse = SignedVersionResponse(version, codename, application, status, resource, "")
-  suspend fun sign(application: Long): SignedVersionResponse? = ResponseSigning.signAsResponse<Version, SignedVersionResponse, Json>(application, this, signable(), json)
+  suspend fun sign(application: Long): SignedVersionResponse? =
+    ResponseSigning.signAsResponse<Version, SignedVersionResponse, Json>(application, this, signable(), json)
 }
 
 @Serializable
@@ -27,7 +28,7 @@ data class SignedVersionResponse(
   val status: VersionStatus,
   val resource: Long,
   override var sign: String,
-): ResponseSigning.SignableResponse()
+) : ResponseSigning.SignableResponse()
 
 enum class VersionStatus { CURRENT, SUPPORTED, UNSUPPORTED }
 

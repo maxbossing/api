@@ -1,17 +1,19 @@
 package ng.bossi.api.database.service
 
-import ng.bossi.api.database.model.*
+import ng.bossi.api.database.model.Applications
+import ng.bossi.api.database.model.Resources
+import ng.bossi.api.database.model.Version
+import ng.bossi.api.database.model.Versions
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.transaction
 
 class VersionService(val database: Database) : IDatabaseService<Long, Version> {
   override suspend fun create(entity: Version): Long = dbQuery {
     Versions.insert {
-      it[Versions.version] = entity.version
-      it[Versions.codename] = entity.codename
-      it[Versions.application] = entity.application
-      it[Versions.status] = entity.status
-      it[Versions.resource] = entity.resource
+      it[version] = entity.version
+      it[codename] = entity.codename
+      it[application] = entity.application
+      it[status] = entity.status
+      it[resource] = entity.resource
     }[Versions.id]
   }
 
@@ -20,22 +22,24 @@ class VersionService(val database: Database) : IDatabaseService<Long, Version> {
     (Versions innerJoin Applications innerJoin Resources)
       .selectAll()
       .where { Versions.id eq id }
-      .map { Version(
-        version = it[Versions.version],
-        codename = it[Versions.codename],
-        application = it[Applications.id],
-        status = it[Versions.status],
-        resource = it[Resources.id]
-      )}.singleOrNull()
+      .map {
+        Version(
+          version = it[Versions.version],
+          codename = it[Versions.codename],
+          application = it[Applications.id],
+          status = it[Versions.status],
+          resource = it[Resources.id]
+        )
+      }.singleOrNull()
   }
 
   override suspend fun update(id: Long, entity: Version): Boolean = dbQuery {
     Versions.update({ Versions.id eq id }) {
-      it[Versions.version] = entity.version
-      it[Versions.codename] = entity.codename
-      it[Versions.application] = entity.application
-      it[Versions.status] = entity.status
-      it[Versions.resource] = entity.resource
+      it[version] = entity.version
+      it[codename] = entity.codename
+      it[application] = entity.application
+      it[status] = entity.status
+      it[resource] = entity.resource
     } > 0
   }
 

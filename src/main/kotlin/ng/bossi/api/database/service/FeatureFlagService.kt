@@ -8,16 +8,16 @@ import org.jetbrains.exposed.sql.*
 class FeatureFlagService(val database: Database) : IDatabaseService<Long, FeatureFlag> {
   override suspend fun create(entity: FeatureFlag): Long = dbQuery {
     FeatureFlags.insert {
-      it[FeatureFlags.name] = entity.name
-      it[FeatureFlags.application] = entity.application
-      it[FeatureFlags.enabled] = entity.enabled
+      it[name] = entity.name
+      it[application] = entity.application
+      it[enabled] = entity.enabled
     }[FeatureFlags.id]
   }
 
   override suspend fun read(id: Long): FeatureFlag? = dbQuery {
     (FeatureFlags innerJoin Applications)
       .selectAll()
-      .where { FeatureFlags.id eq id}
+      .where { FeatureFlags.id eq id }
       .map {
         FeatureFlag(
           name = it[FeatureFlags.name],
@@ -29,9 +29,9 @@ class FeatureFlagService(val database: Database) : IDatabaseService<Long, Featur
 
   override suspend fun update(id: Long, entity: FeatureFlag): Boolean = dbQuery {
     FeatureFlags.update({ FeatureFlags.id eq id }) {
-      it[FeatureFlags.name] = entity.name
-      it[FeatureFlags.application] = entity.application
-      it[FeatureFlags.enabled] = entity.enabled
+      it[name] = entity.name
+      it[application] = entity.application
+      it[enabled] = entity.enabled
     } > 0
   }
 
@@ -41,7 +41,7 @@ class FeatureFlagService(val database: Database) : IDatabaseService<Long, Featur
 
 
   suspend fun nameToId(name: String): Long? = dbQuery {
-    FeatureFlags.select(FeatureFlags.id).where { FeatureFlags.name eq name}.singleOrNull()?.get(FeatureFlags.id)
+    FeatureFlags.select(FeatureFlags.id).where { FeatureFlags.name eq name }.singleOrNull()?.get(FeatureFlags.id)
   }
 
 }

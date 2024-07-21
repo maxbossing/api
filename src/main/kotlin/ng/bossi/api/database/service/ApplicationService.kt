@@ -2,11 +2,10 @@ package ng.bossi.api.database.service
 
 import ng.bossi.api.database.DatabaseController
 import ng.bossi.api.database.model.*
-import ng.bossi.api.logger
 import ng.bossi.api.signing.ResponseSigning
 import org.jetbrains.exposed.sql.*
 
-class ApplicationService(val database: Database): IDatabaseService<Long, Application> {
+class ApplicationService(val database: Database) : IDatabaseService<Long, Application> {
   override suspend fun create(entity: Application): Long = dbQuery {
     Applications.insert {
       it[name] = entity.name
@@ -16,7 +15,7 @@ class ApplicationService(val database: Database): IDatabaseService<Long, Applica
 
   override suspend fun read(id: Long): Application? = dbQuery {
     Applications.selectAll()
-      .where { Applications.id eq id}
+      .where { Applications.id eq id }
       .map { Application(it[Applications.name], it[Applications.key]) }
       .singleOrNull()
   }
@@ -44,7 +43,7 @@ class ApplicationService(val database: Database): IDatabaseService<Long, Applica
       .where { Applications.id eq id }
       .mapNotNull { DatabaseController.versionService.read(it[Versions.id]) }
   }
-  
+
   suspend fun getCurrentVersion(id: Long): Version? = dbQuery { transaction ->
     transaction.addLogger(StdOutSqlLogger)
     (Applications innerJoin Versions)

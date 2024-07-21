@@ -9,8 +9,6 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
-import java.util.logging.Logger
-import kotlin.math.log
 import kotlin.system.exitProcess
 
 object DatabaseController {
@@ -56,7 +54,7 @@ object DatabaseController {
       logger.error("Host cannot be empty!")
       exitProcess(1)
     }
-    if(config.database.isEmpty()) {
+    if (config.database.isEmpty()) {
       logger.error("Database cannot be empty!")
       exitProcess(1)
     }
