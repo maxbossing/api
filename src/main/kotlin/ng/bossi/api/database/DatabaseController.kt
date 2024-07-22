@@ -3,7 +3,7 @@ package ng.bossi.api.database
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import ng.bossi.api.config.ConfigController
-import ng.bossi.api.database.model.*
+import ng.bossi.api.model.*
 import ng.bossi.api.database.service.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -38,6 +38,7 @@ object DatabaseController {
   val resourceService by lazy { ResourceService(db) }
   val singleLicenseService by lazy { SingleLicenseService(db) }
   val versionService by lazy { VersionService(db) }
+  val bearerTokenService by lazy { BearerTokenService(db) }
 
   init {
     logger.info("Initializing database...")
@@ -64,7 +65,7 @@ object DatabaseController {
 
     logger.info("Creating Schema...")
     transaction {
-      SchemaUtils.create(Applications, FeatureFlags, Resources, SingleLicenses, Versions)
+      SchemaUtils.create(Applications, FeatureFlags, Resources, SingleLicenses, Versions, BearerTokens)
     }
 
     logger.info("Loading Application Service...")

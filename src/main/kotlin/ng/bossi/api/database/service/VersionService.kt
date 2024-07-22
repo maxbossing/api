@@ -1,13 +1,14 @@
 package ng.bossi.api.database.service
 
-import ng.bossi.api.database.model.Applications
-import ng.bossi.api.database.model.Resources
-import ng.bossi.api.database.model.Version
-import ng.bossi.api.database.model.Versions
+import ng.bossi.api.model.*
 import org.jetbrains.exposed.sql.*
 
-class VersionService(val database: Database) : IDatabaseService<Long, Version> {
-  override suspend fun create(entity: Version): Long = dbQuery {
+@Suppress("unused")
+class VersionService(val database: Database) : DatabaseQuerying<Version> {
+  suspend fun createById(entity: Version): Long? = dbQuery {
+    if (readByName(entity.version, entity.application) != null)
+      return@dbQuery null
+
     Versions.insert {
       it[version] = entity.version
       it[codename] = entity.codename
@@ -17,33 +18,49 @@ class VersionService(val database: Database) : IDatabaseService<Long, Version> {
     }[Versions.id]
   }
 
-  override suspend fun read(id: Long): Version? = dbQuery { transaction ->
-    transaction.addLogger(StdOutSqlLogger)
+  suspend fun readById(id: Long): Version? = dbQuery {
     (Versions innerJoin Applications innerJoin Resources)
       .selectAll()
       .where { Versions.id eq id }
-      .map {
-        Version(
-          version = it[Versions.version],
-          codename = it[Versions.codename],
-          application = it[Applications.id],
-          status = it[Versions.status],
-          resource = it[Resources.id]
-        )
-      }.singleOrNull()
+      .map { Version.fromRow(it) }
+      .singleOrNull()
   }
 
-  override suspend fun update(id: Long, entity: Version): Boolean = dbQuery {
-    Versions.update({ Versions.id eq id }) {
-      it[version] = entity.version
-      it[codename] = entity.codename
-      it[application] = entity.application
-      it[status] = entity.status
-      it[resource] = entity.resource
-    } > 0
+  suspend fun readByName(version: String, application: Long): Version? = dbQuery { it ->
+    it.addLogger(StdOutSqlLogger)
+    (Versions innerJoin Applications innerJoin Resources)
+      .selectAll()
+      .where { (Versions.version eq version) and (Applications.id eq application) }
+      .map { Version.fromRow(it) }
+      .singleOrNull()
   }
 
-  override suspend fun delete(id: Long): Boolean = dbQuery {
+  suspend fun updateById(id: Long, resource: Long? = null, status: VersionStatus? = null): Boolean = dbQuery {
+    (Versions innerJoin Applications innerJoin Resources)
+      .update({ Versions.id eq id }) {
+        status?.let { s -> it[Versions.status] = s }
+        resource?.let { r -> it[Versions.resource] = r }
+      } > 0
+  }
+
+  suspend fun updateByName(
+    version: String,
+    application: Long,
+    resource: Long? = null,
+    status: VersionStatus? = null,
+  ): Boolean = dbQuery {
+    (Versions innerJoin Applications innerJoin Resources)
+      .update({ (Versions.version eq version) and (Applications.id eq application) }) {
+        status?.let { s -> it[Versions.status] = s }
+        resource?.let { r -> it[Versions.resource] = r }
+      } > 0
+  }
+
+  suspend fun deleteById(id: Long): Boolean = dbQuery {
     Versions.deleteWhere { Op.build { Versions.id eq id } } > 0
+  }
+
+  suspend fun deleteByName(version: String, application: Long): Boolean = dbQuery {
+    Versions.deleteWhere { Op.build { (Versions.version eq version) and (Applications.id eq application) } } > 0
   }
 }

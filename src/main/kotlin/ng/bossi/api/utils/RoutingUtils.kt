@@ -2,32 +2,54 @@ package ng.bossi.api.utils
 
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import ng.bossi.api.database.DatabaseController
-import ng.bossi.api.database.model.Application
-import ng.bossi.api.database.model.SingleLicenseStatus
-import kotlin.reflect.KClass
+import ng.bossi.api.model.Application
+import ng.bossi.api.model.Resource
 
 suspend inline fun ApplicationCall.applicationCall(
-  block: (applicationId: Long, application: Application) -> Unit
+  block: (applicationId: Long, applicationName: String, application: Application) -> Unit,
 ) {
-  val applicationId = parameters["applicationId"]?.toLongOrNull()
-
-  if (applicationId == null) {
-    respond(HttpStatusCode.BadRequest, "Invalid ApplicationId!")
+  val applicationName = parameters["applicationName"]
+  if (applicationName.isNullOrBlank()){
+    respond(HttpStatusCode.BadRequest, "Application name must not be empty")
     return
   }
 
-  val application = DatabaseController.applicationService.read(applicationId)
-
+  val application = DatabaseController.applicationService.readByName(applicationName)
 
   if (application == null) {
     respond(HttpStatusCode.NotFound, "Application not found!")
     return
   }
 
-  block(applicationId, application)
+  block(application.first, application.second.name, application.second)
+}
+
+suspend inline fun ApplicationCall.resourceCall(
+  block: (resourceId: Long, resource: Resource) -> Unit,
+) {
+  val resourceIdParam = parameters["resourceId"]
+
+  if (resourceIdParam.isNullOrBlank()){
+    respond(HttpStatusCode.BadRequest, "Resource id must not be empty")
+    return
+  }
+
+  val resourceId = resourceIdParam.toLongOrNull()
+  if (resourceId == null) {
+    respond(HttpStatusCode.BadRequest, "Invalid Resource Id!")
+    return
+  }
+
+  val resource = DatabaseController.resourceService.read(resourceId)
+
+  if (resource == null) {
+    respond(HttpStatusCode.NotFound, "Resource not found!")
+    return
+  }
+
+  block(resourceId, resource)
 }
 
 suspend fun ApplicationCall.parameter(name: String): String? = request.queryParameters[name].let {
@@ -53,7 +75,7 @@ suspend fun ApplicationCall.boolParameter(name: String): Boolean? {
 
 inline fun <reified T : Enum<T>> safeValueOf(type: String): T? = java.lang.Enum.valueOf(T::class.java, type)
 
-suspend inline fun <reified T: Enum<T>> ApplicationCall.enumParameter(name: String): T? {
+suspend inline fun <reified T : Enum<T>> ApplicationCall.enumParameter(name: String): T? {
   val param = parameter(name) ?: return null
   return safeValueOf<T>(param).let {
     it ?: respond(HttpStatusCode.BadRequest, "Malformed Parameter $name")

@@ -1,0 +1,15 @@
+meta {
+  name: Get Resource
+  type: http
+  seq: 1
+}
+
+get {
+  url: 127.0.0.1:8080/v1/resources/{{resourceId}}
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  resourceId: 1
+}

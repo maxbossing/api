@@ -1,6 +1,5 @@
 package ng.bossi.api.signing
 
-import java.security.Key
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 

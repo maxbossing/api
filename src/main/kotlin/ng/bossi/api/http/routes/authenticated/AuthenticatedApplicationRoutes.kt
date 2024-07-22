@@ -2,35 +2,39 @@ package ng.bossi.api.http.routes.authenticated
 
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
 import kotlinx.serialization.Serializable
+import ng.bossi.api.auth.BearerPermission
 import ng.bossi.api.database.DatabaseController
-import ng.bossi.api.database.model.Application
+import ng.bossi.api.model.Application
 import ng.bossi.api.signing.KeyGenerator
 import ng.bossi.api.utils.applicationCall
 import ng.bossi.api.utils.parameter
-import javax.xml.crypto.Data
-
 
 @Serializable
-data class ApplicationResponse(
-  val name: String,
-  val publicKey: String,
-  val applicationId: Long
-)
+private data class ApplicationResponse(val name: String, val key: String)
+
 
 fun Route.authenticatedApplicationRoutes() {
-  put("/application/create") {
+  put("/create") {
+    if (!call.principal<BearerPermission>()!!.application.create) {
+      call.respond(HttpStatusCode.Unauthorized)
+      return@put
+    }
+
     val name = call.parameter("name") ?: return@put
 
-    val exists = DatabaseController.applicationService.nameToId(name) != null
+    val exists = DatabaseController.applicationService.readByName(name) != null
 
     if (exists) {
       call.respond(HttpStatusCode.Conflict, "Application with given name already exists!")
       return@put
     }
+
     val key = KeyGenerator.generateKey()
     val id = DatabaseController.applicationService.create(
       Application(
@@ -38,32 +42,32 @@ fun Route.authenticatedApplicationRoutes() {
         key = key.private.encoded
       )
     )
-    call.respond<ApplicationResponse>(
+
+    call.respond(
       HttpStatusCode.Created,
       ApplicationResponse(
-        name,
-        key.public.encoded.encodeBase64(),
-        id
+        name = name,
+        key = key.public.encoded.encodeBase64()
       )
     )
   }
-  patch("/application/update/{applicationName}/key") {
-    call.applicationCall { applicationName: String ->
 
-      val application = DatabaseController.applicationService.getByName(applicationName)
-      if (application == null) {
-        call.respond(HttpStatusCode.NotFound, "Application not found!")
-        return@applicationCall
-      }
+  patch("/{applicationName}/update/key") {
+    if (!call.principal<BearerPermission>()!!.application.updateKey) {
+      call.respond(HttpStatusCode.Unauthorized)
+      return@patch
+    }
+    call.applicationCall { applicationId, applicationName, application ->
 
       val key = KeyGenerator.generateKey()
 
       if (!DatabaseController
-        .applicationService
-        .update(
-          application.first,
-          application.second.copy(name = applicationName, key = key.private.encoded)
-        )) {
+          .applicationService
+          .updateById(
+            applicationId,
+            key.private.encoded
+          )
+      ) {
         call.respond(HttpStatusCode.InternalServerError, "Application Update failed!")
         return@applicationCall
       }
@@ -73,37 +77,24 @@ fun Route.authenticatedApplicationRoutes() {
         ApplicationResponse(
           applicationName,
           key.public.encoded.encodeBase64(),
-          application.first,
         )
       )
     }
   }
-  delete("/application/{applicationName}") {
-    call.applicationCall { applicationName ->
-      val application = DatabaseController.applicationService.getByName(applicationName)
-      if (application == null) {
-        call.respond(HttpStatusCode.NotFound, "Application not found!")
-        return@applicationCall
-      }
-      val success = DatabaseController.applicationService.delete(application.first)
+  delete("/{applicationName}") {
+    if (!call.principal<BearerPermission>()!!.application.delete) {
+      call.respond(HttpStatusCode.Unauthorized)
+      return@delete
+    }
+    call.applicationCall { applicationId, applicationName, application ->
+
+      val success = DatabaseController.applicationService.deleteById(applicationId)
       if (!success) {
         call.respond(HttpStatusCode.InternalServerError, "Application delete failed!")
         return@applicationCall
       }
+
       call.respond(HttpStatusCode.OK, "Application deleted successfully!")
     }
   }
-}
-
-suspend inline fun ApplicationCall.applicationCall(
-  block: (applicationName: String) -> Unit
-) {
-  val applicationName = parameters["applicationName"]
-
-  if (applicationName.isNullOrBlank()) {
-    respond(HttpStatusCode.BadRequest, "Invalid Application Name!")
-    return
-  }
-
-  block(applicationName)
 }

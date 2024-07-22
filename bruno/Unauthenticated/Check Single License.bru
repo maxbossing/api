@@ -1,0 +1,20 @@
+meta {
+  name: Check Single License
+  type: http
+  seq: 1
+}
+
+get {
+  url: 127.0.0.1:8080/v1/application/{{applicationName}}/license/single/{{licenseKey}}
+  body: none
+  auth: none
+}
+
+headers {
+  Know-Once: hehe
+}
+
+vars:pre-request {
+  applicationName: peniz
+  licenseKey: 797adb78-6614-4dc1-9480-895163661b2d
+}

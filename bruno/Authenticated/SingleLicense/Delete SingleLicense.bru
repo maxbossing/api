@@ -1,0 +1,21 @@
+meta {
+  name: Delete SingleLicense
+  type: http
+  seq: 1
+}
+
+delete {
+  url: 127.0.0.1:8080/v1/application/{{applicationName}}/license/single/{{licenseKey}}
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: admin
+  password: admin
+}
+
+vars:pre-request {
+  applicationName: melvin501
+  licenseKey: 2d859e41-790e-4e50-a111-0450a036decd
+}

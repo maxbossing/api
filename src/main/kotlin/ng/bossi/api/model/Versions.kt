@@ -1,10 +1,8 @@
-package ng.bossi.api.database.model
+package ng.bossi.api.model
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import ng.bossi.api.signing.ResponseSigning
-import ng.bossi.api.utils.json
 import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.Table
 
 @Serializable
@@ -13,23 +11,27 @@ data class Version(
   val codename: String,
   val application: Long,
   val status: VersionStatus,
-  val resource: Long
+  val resource: Long,
 ) {
-  fun signable(): SignedVersionResponse = SignedVersionResponse(version, codename, application, status, resource, "")
-  suspend fun sign(application: Long): SignedVersionResponse? =
-    ResponseSigning.signAsResponse<Version, SignedVersionResponse, Json>(application, this, signable(), json)
+  companion object : IResultRowMappable<Version> {
+    override fun fromRow(row: ResultRow): Version? {
+      try {
+        return Version(
+          row[Versions.version],
+          row[Versions.codename],
+          row[Versions.application],
+          row[Versions.status],
+          row[Versions.resource],
+        )
+      } catch (e: Exception) {
+        e.printStackTrace()
+        return null
+      }
+    }
+  }
 }
 
-@Serializable
-data class SignedVersionResponse(
-  val version: String,
-  val codename: String,
-  val application: Long,
-  val status: VersionStatus,
-  val resource: Long,
-  override var sign: String,
-) : ResponseSigning.SignableResponse()
-
+@Suppress("unused")
 enum class VersionStatus { CURRENT, SUPPORTED, UNSUPPORTED }
 
 object Versions : Table() {

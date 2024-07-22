@@ -1,0 +1,24 @@
+meta {
+  name: Create FeatureFlag
+  type: http
+  seq: 1
+}
+
+put {
+  url: 127.0.0.1:8080/v1/application/{{applicationName}}/featureFlags/create?name=banko.tv&enabled=true
+  body: none
+  auth: bearer
+}
+
+params:query {
+  name: banko.tv
+  enabled: true
+}
+
+auth:bearer {
+  token: fgmpzZzYqkjVdu25ZZyWoy8716kpuobtYasIoqxzF1s=
+}
+
+vars:pre-request {
+  applicationName: melvin501
+}

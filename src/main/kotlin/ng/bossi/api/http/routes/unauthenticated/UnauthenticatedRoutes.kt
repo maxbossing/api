@@ -4,11 +4,14 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Routing.initUnauthenticatedRoutes() {
+fun Route.initUnauthenticatedRoutes() {
   get("/helloworld") { call.respondText("Hello World!") }
-
-  unauthenticatedVersionRoutes()
-  unauthenticatedFeatureFlagRoutes()
-  unauthenticatedSingleLicenseRoutes()
-  unauthenticatedResourceRoutes()
+  route("/application") {
+    unauthenticatedVersionRoutes()
+    unauthenticatedFeatureFlagRoutes()
+    unauthenticatedSingleLicenseRoutes()
+  }
+  route("/resources") {
+    unauthenticatedResourceRoutes()
+  }
 }

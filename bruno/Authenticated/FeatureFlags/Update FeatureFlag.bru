@@ -1,0 +1,25 @@
+meta {
+  name: Update FeatureFlag
+  type: http
+  seq: 1
+}
+
+patch {
+  url: 127.0.0.1:8080/v1/application/{{applicationName}}/featureFlags/{{flagName}}/update?enabled=false
+  body: none
+  auth: basic
+}
+
+params:query {
+  enabled: false
+}
+
+auth:basic {
+  username: admin
+  password: admin
+}
+
+vars:pre-request {
+  applicationName: melvin501
+  flagName: banko.tv
+}

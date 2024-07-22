@@ -1,0 +1,21 @@
+meta {
+  name: Delete FeatureFlag
+  type: http
+  seq: 1
+}
+
+delete {
+  url: 127.0.0.1:8080/v1/application/{{applicationName}}/featureFlags/{{flagName}}
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: admin
+  password: admin
+}
+
+vars:pre-request {
+  applicationName: melvin501
+  flagName: banko.tv
+}

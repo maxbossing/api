@@ -1,13 +1,14 @@
 package ng.bossi.api.database.service
 
-import ng.bossi.api.database.model.Applications
-import ng.bossi.api.database.model.FeatureFlag
-import ng.bossi.api.database.model.FeatureFlags
+import ng.bossi.api.model.Applications
+import ng.bossi.api.model.FeatureFlag
+import ng.bossi.api.model.FeatureFlags
 import org.jetbrains.exposed.sql.*
-import java.awt.geom.PathIterator
 
-class FeatureFlagService(val database: Database) : IDatabaseService<Long, FeatureFlag> {
-  override suspend fun create(entity: FeatureFlag): Long = dbQuery {
+@Suppress("unused")
+class FeatureFlagService(val database: Database) : DatabaseQuerying<FeatureFlag> {
+
+  suspend fun create(entity: FeatureFlag): Long = dbQuery {
     FeatureFlags.insert {
       it[name] = entity.name
       it[application] = entity.application
@@ -15,38 +16,29 @@ class FeatureFlagService(val database: Database) : IDatabaseService<Long, Featur
     }[FeatureFlags.id]
   }
 
-  override suspend fun read(id: Long): FeatureFlag? = dbQuery {
+  suspend fun read(name: String, application: Long): Pair<Long, FeatureFlag>? = dbQuery {
     (FeatureFlags innerJoin Applications)
       .selectAll()
-      .where { FeatureFlags.id eq id }
-      .map {
-        FeatureFlag(
-          name = it[FeatureFlags.name],
-          application = it[Applications.id],
-          enabled = it[FeatureFlags.enabled],
-        )
-      }.singleOrNull()
+      .where { (FeatureFlags.name eq name) and (FeatureFlags.application eq application) }
+      .map { it[FeatureFlags.id] to (FeatureFlag.fromRow(it) ?: return@dbQuery null) }
+      .singleOrNull()
   }
 
-  override suspend fun update(id: Long, entity: FeatureFlag): Boolean = dbQuery {
-    FeatureFlags.update({ FeatureFlags.id eq id }) {
-      it[name] = entity.name
-      it[application] = entity.application
-      it[enabled] = entity.enabled
+  suspend fun update(name: String, application: Long, enabled: Boolean): Boolean = dbQuery {
+    FeatureFlags.update({ (FeatureFlags.name eq name) and (FeatureFlags.application eq application) }) {
+      it[FeatureFlags.enabled] = enabled
     } > 0
   }
 
-  override suspend fun delete(id: Long): Boolean = dbQuery {
+  suspend fun deleteById(id: Long): Boolean = dbQuery {
     FeatureFlags.deleteWhere { Op.build { FeatureFlags.id eq id } } > 0
   }
 
-
-  suspend fun nameToId(name: String): Long? = dbQuery {
-    FeatureFlags.select(FeatureFlags.id).where { FeatureFlags.name eq name }.singleOrNull()?.get(FeatureFlags.id)
+  suspend fun nameById(id: Long): Pair<String, Long>? = dbQuery {
+    (FeatureFlags innerJoin Applications)
+      .select(FeatureFlags.name, FeatureFlags.application)
+      .where { FeatureFlags.id eq id }
+      .map { it[FeatureFlags.name] to it[FeatureFlags.application] }
+      .singleOrNull()
   }
-  suspend fun readByName(name: String): Pair<Long, FeatureFlag>? {
-    val id = nameToId(name) ?: return null
-    return id to read(id)!!
-  }
-
 }

@@ -5,11 +5,18 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import ng.bossi.api.database.DatabaseController
+import ng.bossi.api.model.FeatureFlag
+import ng.bossi.api.signing.signature
 import ng.bossi.api.utils.applicationCall
 
 fun Route.unauthenticatedFeatureFlagRoutes() {
-  get("application/{applicationId}/featureFlags/{featureFlag}") {
-    call.applicationCall { applicationId, _ ->
+  get("/{applicationName}/featureFlags/{featureFlag}") {
+    call.applicationCall { applicationId, applicationName, _ ->
+      val knowOnce = call.request.headers["Know-Once"]
+      if (knowOnce == null) {
+        call.respond(HttpStatusCode.BadRequest, "Missing Know-Once Header!")
+        return@applicationCall
+      }
       val featureFlagName = call.parameters["featureFlag"]
 
       if (featureFlagName == null) {
@@ -17,16 +24,15 @@ fun Route.unauthenticatedFeatureFlagRoutes() {
         return@applicationCall
       }
 
-      val featureFlagId = DatabaseController.featureFlagService.nameToId(featureFlagName)
+      val featureFlag = DatabaseController.featureFlagService.read(featureFlagName, applicationId)
 
-      if (featureFlagId == null) {
-        call.respond(HttpStatusCode.NotFound, "Feature flag does not exist!")
+      if (featureFlag == null) {
+        call.respond(HttpStatusCode.NotFound, "FeatureFlag Not Found!")
         return@applicationCall
       }
 
-      val featureFlag = DatabaseController.featureFlagService.read(featureFlagId)!!
-
-      call.respond(featureFlag.sign(applicationId)!!)
+      call.response.headers.append("Signature", featureFlag.second.signature(applicationId, FeatureFlag.serializer(), knowOnce)!!)
+      call.respond(featureFlag.second)
     }
   }
 }

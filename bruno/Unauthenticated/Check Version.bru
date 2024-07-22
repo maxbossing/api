@@ -1,0 +1,16 @@
+meta {
+  name: Check Version
+  type: http
+  seq: 1
+}
+
+get {
+  url: 127.0.0.1:8080/v1/application/{{applicationName}}/versions/{{versionName}}
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  applicationName: peniz
+  versionName: 1.0.0
+}

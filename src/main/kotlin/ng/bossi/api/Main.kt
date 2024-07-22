@@ -9,6 +9,8 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import ng.bossi.api.auth.BearerPermission
+import ng.bossi.api.auth.BearerPermissions
 import ng.bossi.api.config.ConfigController
 import ng.bossi.api.database.DatabaseController
 import ng.bossi.api.http.routes.authenticated.initAuthenticatedRoutes
@@ -27,6 +29,14 @@ suspend fun main() = coroutineScope {
   ConfigController
   DatabaseController
 
+  if (DatabaseController.bearerTokenService.count() == 0L) {
+    logger.warn("There is no authentication token stored on disk")
+    logger.warn("The following token will be created with all Permissions")
+    logger.warn("And will be only shown once!")
+    logger.warn(DatabaseController.bearerTokenService.create(BearerPermissions.ALL.bit))
+  }
+
+
   logger.info("Starting KTOR Server...")
 
   launch {
@@ -35,24 +45,22 @@ suspend fun main() = coroutineScope {
         json()
       }
       install(Authentication) {
-        basic("auth-basic") {
-          realm = "Access to the '/auth' path"
-          validate { credentials ->
-            if (credentials.name == "admin" && credentials.password == "admin")
-              UserIdPrincipal(credentials.name)
-            else null
+        bearer("auth-bearer") {
+          authenticate {
+            it.token
+            val permissions = DatabaseController.bearerTokenService.getPermissions(it.token) ?: return@authenticate null
+            BearerPermission.fromLong(permissions)
           }
         }
       }
       install(Routing) {
-        initUnauthenticatedRoutes()
-        authenticate("auth-basic") {
-          route("/auth") {
+        route("/v1") {
+          initUnauthenticatedRoutes()
+          authenticate("auth-bearer") {
             initAuthenticatedRoutes()
           }
         }
       }
-
     }.start(true)
   }
 

@@ -1,7 +1,8 @@
-package ng.bossi.api.database.model
+package ng.bossi.api.model
 
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.Table
 
 
@@ -23,6 +24,17 @@ data class Application(val name: String, val key: ByteArray) {
     var result = 31 + name.hashCode()
     result = 31 * result + key.contentHashCode()
     return result
+  }
+
+  companion object : IResultRowMappable<Application> {
+    override fun fromRow(row: ResultRow): Application? {
+      try {
+        return Application(row[Applications.name], row[Applications.key])
+      } catch (e: Exception) {
+        e.printStackTrace()
+        return null
+      }
+    }
   }
 }
 

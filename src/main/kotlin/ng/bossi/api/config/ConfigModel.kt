@@ -10,6 +10,9 @@ data class APIConfig(
 
   @SerialName("Discord")
   val discordConfig: DiscordConfig = DiscordConfig(),
+
+  @SerialName("Authentication")
+  val authenticationConfig: AuthenticationConfig = AuthenticationConfig()
 )
 
 @Serializable
@@ -26,4 +29,9 @@ data class DiscordConfig(
   val token: String = "",
   val logChannel: Long = 0,
   val adminUsers: Set<Long> = setOf(492297419736875009), /*Fuck you OAuth*/
+)
+
+@Serializable
+data class AuthenticationConfig(
+  val jwtPrivateKey: String = ""
 )
