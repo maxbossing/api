@@ -1,9 +1,26 @@
 # Technologies
 * PostgresQL (Exposed)
-* http4k (REST)
+* KTOR (REST)
 
 ## ToDo
-* [ ] Switch to Embedded Server from EngineMain
+* [x] Switch to Embedded Server from EngineMain
+* [ ] Refactor
+  * Sign authenticated requests both ways
+  * Save Keypair in DB
+  * Move Keys to KeyStore
+  * Application Calls id -> name (name is unique) 
+  * Application Call helpers for query/parameters
+  * Tree structure for routes
+* [ ] Ratelimit
+* [ ] Real authentication (bearer) for real men
+* [ ] Message (Webhook) on Error
+* [ ] Error Handling
+* [ ] Better Service architecture
+* [ ] Abstract routing handler (partially) into data classes
+* [ ] Implement updates with put directly
+* [ ] Return enum parameters on failed request
+* [ ] Licenses Long -> UUID (maybe something custom :thonk:)
+* [ ] Rethink if application is needed for license endpoints
 
 
 # Functions
@@ -20,7 +37,6 @@
 * [ ] Resource Download
 * [ ] Auto Updates (based on resources)
 * [ ] Discord Manager Bot
-
 
 # API Schema
 
