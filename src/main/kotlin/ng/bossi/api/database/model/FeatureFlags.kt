@@ -25,7 +25,7 @@ data class SignedFeatureFlagResponse(
 ) : ResponseSigning.SignableResponse()
 
 object FeatureFlags : Table() {
-  val id: Column<Long> = long("id").autoIncrement()
+  val id: Column<Long> = long("featureFlagId").autoIncrement()
   val name: Column<String> = varchar("name", 255)
   val application: Column<Long> = reference("applicationId", Applications.id)
   val enabled: Column<Boolean> = bool("enabled")

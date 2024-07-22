@@ -35,8 +35,9 @@ class ApplicationService(val database: Database) : IDatabaseService<Long, Applic
     val successful = Applications.deleteWhere { Op.build { Applications.id eq id } } > 0
     ResponseSigning.keyCache.invalidate(id)
     successful
-
   }
+
+  suspend fun deleteByName(name: String): Boolean = delete(nameToId(name)?: -1)
 
   suspend fun getVersions(id: Long): List<Version> = dbQuery {
     (Applications innerJoin Versions).selectAll()
@@ -49,8 +50,25 @@ class ApplicationService(val database: Database) : IDatabaseService<Long, Applic
     (Applications innerJoin Versions)
       .select(Versions.id)
       .where { (Applications.id eq id) and (Versions.status eq VersionStatus.CURRENT) }
-      .map { DatabaseController.versionService.read(it[Versions.id]).also { println(it) } }
+      .map { DatabaseController.versionService.read(it[Versions.id])}
       .singleOrNull()
+  }
+
+  suspend fun getByName(name: String): Pair <Long, Application>? = dbQuery {
+    it.addLogger(StdOutSqlLogger)
+    Applications
+      .selectAll()
+      .where {Applications.name eq name }
+      .map { it[Applications.id] to Application(it[Applications.name], it[Applications.key]) }
+      .singleOrNull()
+  }
+
+  suspend fun nameToId(name: String): Long? = dbQuery {
+    Applications.select(Applications.id).where { Applications.name eq name }.singleOrNull()?.get(Applications.id)
+  }
+
+  suspend fun updateByName(name: String, key: ByteArray): Boolean {
+    return update(nameToId(name) ?: return false, Application(name = name, key = key))
   }
 
 }

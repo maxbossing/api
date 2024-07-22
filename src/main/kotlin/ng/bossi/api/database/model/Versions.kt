@@ -33,7 +33,7 @@ data class SignedVersionResponse(
 enum class VersionStatus { CURRENT, SUPPORTED, UNSUPPORTED }
 
 object Versions : Table() {
-  val id: Column<Long> = long("id").autoIncrement()
+  val id: Column<Long> = long("versionId").autoIncrement()
   val version: Column<String> = varchar("version", 255)
   val codename: Column<String> = varchar("codename", 255)
   val application: Column<Long> = reference("applicationId", Applications.id)

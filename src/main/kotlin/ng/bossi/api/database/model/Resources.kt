@@ -30,7 +30,7 @@ data class Resource(val name: String, val hash: ByteArray, val size: Long, val u
 }
 
 object Resources : Table() {
-  val id: Column<Long> = long("id").autoIncrement()
+  val id: Column<Long> = long("resourceId").autoIncrement()
   val name: Column<String> = varchar("name", 1024)
   val hash: Column<ByteArray> = binary("hash", 16)
   val size: Column<Long> = long("size")

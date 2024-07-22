@@ -4,6 +4,7 @@ import ng.bossi.api.database.model.Applications
 import ng.bossi.api.database.model.FeatureFlag
 import ng.bossi.api.database.model.FeatureFlags
 import org.jetbrains.exposed.sql.*
+import java.awt.geom.PathIterator
 
 class FeatureFlagService(val database: Database) : IDatabaseService<Long, FeatureFlag> {
   override suspend fun create(entity: FeatureFlag): Long = dbQuery {
@@ -42,6 +43,10 @@ class FeatureFlagService(val database: Database) : IDatabaseService<Long, Featur
 
   suspend fun nameToId(name: String): Long? = dbQuery {
     FeatureFlags.select(FeatureFlags.id).where { FeatureFlags.name eq name }.singleOrNull()?.get(FeatureFlags.id)
+  }
+  suspend fun readByName(name: String): Pair<Long, FeatureFlag>? {
+    val id = nameToId(name) ?: return null
+    return id to read(id)!!
   }
 
 }

@@ -29,7 +29,7 @@ data class SignedSingleLicenseResponse(
 enum class SingleLicenseStatus { ENABLED, DISABLED, PAUSED }
 
 object SingleLicenses : Table() {
-  val id: Column<Long> = long("id").autoIncrement()
+  val id: Column<Long> = long("singleLicenseId").autoIncrement()
   val application: Column<Long> = reference("applicationId", Applications.id)
   val status: Column<SingleLicenseStatus> = enumeration("status", SingleLicenseStatus::class)
 

@@ -34,7 +34,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:2.3.12")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:2.3.12")
     implementation("io.ktor:ktor-server-cio-jvm:2.3.12")
-    implementation("io.ktor:ktor-server-config-yaml:2.3.12")
+    implementation("io.ktor:ktor-server-auth:2.3.12")
 
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
     implementation("com.sksamuel.aedile:aedile-core:1.3.1")
