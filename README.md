@@ -1,3 +1,5 @@
+> Still work-in-progress, expect the unexpected
+
 # Technologies
 * PostgresQL (Exposed)
 * KTOR (REST)
