@@ -2,6 +2,7 @@ package ng.bossi.api.database.service
 
 import ng.bossi.api.model.Applications
 import ng.bossi.api.model.FeatureFlag
+import ng.bossi.api.model.FeatureFlagState
 import ng.bossi.api.model.FeatureFlags
 import org.jetbrains.exposed.sql.*
 
@@ -12,7 +13,7 @@ class FeatureFlagService(val database: Database) : DatabaseQuerying<FeatureFlag>
     FeatureFlags.insert {
       it[name] = entity.name
       it[application] = entity.application
-      it[enabled] = entity.enabled
+      it[state] = entity.state
     }[FeatureFlags.id]
   }
 
@@ -24,9 +25,9 @@ class FeatureFlagService(val database: Database) : DatabaseQuerying<FeatureFlag>
       .singleOrNull()
   }
 
-  suspend fun update(name: String, application: Long, enabled: Boolean): Boolean = dbQuery {
+  suspend fun update(name: String, application: Long, state: FeatureFlagState): Boolean = dbQuery {
     FeatureFlags.update({ (FeatureFlags.name eq name) and (FeatureFlags.application eq application) }) {
-      it[FeatureFlags.enabled] = enabled
+      it[FeatureFlags.state] = state
     } > 0
   }
 

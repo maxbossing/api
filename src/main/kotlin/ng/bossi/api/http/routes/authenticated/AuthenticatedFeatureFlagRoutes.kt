@@ -9,9 +9,11 @@ import io.ktor.server.routing.*
 import ng.bossi.api.auth.BearerPermission
 import ng.bossi.api.database.DatabaseController
 import ng.bossi.api.model.FeatureFlag
+import ng.bossi.api.model.FeatureFlagState
 import ng.bossi.api.signing.signature
 import ng.bossi.api.utils.applicationCall
 import ng.bossi.api.utils.boolParameter
+import ng.bossi.api.utils.enumParameter
 import ng.bossi.api.utils.parameter
 
 
@@ -22,21 +24,21 @@ fun Route.authenticatedFeatureFlagRoutes() {
       call.respond(HttpStatusCode.Unauthorized)
       return@put
     }
-    call.applicationCall { applicationId, applicationName, application ->
+    call.applicationCall { applicationId, _, _ ->
       val knowOnce = call.request.headers["X-Know-Once"]
       if (knowOnce == null) {
         call.respond(HttpStatusCode.BadRequest, "Missing X-Know-Once Header!")
         return@applicationCall
       }
       val name = call.parameter("name") ?: return@put
-      val enabled = call.boolParameter("enabled") ?: return@put
+      val state = call.enumParameter<FeatureFlagState>("state") ?: return@put
 
       if (DatabaseController.featureFlagService.read(application = applicationId, name = name) != null) {
         call.respond(HttpStatusCode.Conflict, "Feature flag already exists")
         return@put
       }
 
-      val flag = FeatureFlag(name, applicationId, enabled)
+      val flag = FeatureFlag(name, applicationId, state)
 
       DatabaseController.featureFlagService.create(flag)
 
@@ -50,7 +52,7 @@ fun Route.authenticatedFeatureFlagRoutes() {
       call.respond(HttpStatusCode.Unauthorized)
       return@patch
     }
-    call.applicationCall { applicationId, applicationName, application ->
+    call.applicationCall { applicationId, _, _ ->
       val knowOnce = call.request.headers["X-Know-Once"]
       if (knowOnce == null) {
         call.respond(HttpStatusCode.BadRequest, "Missing X-Know-Once Header!")
@@ -68,21 +70,21 @@ fun Route.authenticatedFeatureFlagRoutes() {
         return@applicationCall
       }
 
-      val enabled = call.boolParameter("enabled") ?: return@applicationCall
+      val state = call.enumParameter<FeatureFlagState>("state") ?: return@applicationCall
 
-      val success = DatabaseController.featureFlagService.update(flagName, applicationId, enabled)
+      val success = DatabaseController.featureFlagService.update(flagName, applicationId, state)
 
       if (!success) {
         call.respond(HttpStatusCode.InternalServerError, "Failed to update FeatureFlag!")
         return@applicationCall
       }
 
-      val flag = FeatureFlag(flagName, applicationId, enabled)
+      val flag = FeatureFlag(flagName, applicationId, state)
 
       call.response.headers.append("Signature", flag.signature(applicationId, FeatureFlag.serializer(), knowOnce)!!)
       call.respond<FeatureFlag>(
         HttpStatusCode.OK,
-        FeatureFlag(flagName, applicationId, enabled),
+        FeatureFlag(flagName, applicationId, state),
       )
     }
   }
@@ -92,7 +94,7 @@ fun Route.authenticatedFeatureFlagRoutes() {
       call.respond(HttpStatusCode.Unauthorized)
       return@delete
     }
-    call.applicationCall { applicationId, applicationName, application ->
+    call.applicationCall { applicationId, _, _ ->
       val flagName = call.parameters["flagName"]
       if (flagName == null) {
         call.respond(HttpStatusCode.BadRequest, "Invalid FeatureFlag!")
