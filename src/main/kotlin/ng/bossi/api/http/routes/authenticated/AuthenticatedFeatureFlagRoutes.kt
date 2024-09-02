@@ -23,9 +23,9 @@ fun Route.authenticatedFeatureFlagRoutes() {
       return@put
     }
     call.applicationCall { applicationId, applicationName, application ->
-      val knowOnce = call.request.headers["Know-Once"]
+      val knowOnce = call.request.headers["X-Know-Once"]
       if (knowOnce == null) {
-        call.respond(HttpStatusCode.BadRequest, "Missing Know-Once Header!")
+        call.respond(HttpStatusCode.BadRequest, "Missing X-Know-Once Header!")
         return@applicationCall
       }
       val name = call.parameter("name") ?: return@put
@@ -51,9 +51,9 @@ fun Route.authenticatedFeatureFlagRoutes() {
       return@patch
     }
     call.applicationCall { applicationId, applicationName, application ->
-      val knowOnce = call.request.headers["Know-Once"]
+      val knowOnce = call.request.headers["X-Know-Once"]
       if (knowOnce == null) {
-        call.respond(HttpStatusCode.BadRequest, "Missing Know-Once Header!")
+        call.respond(HttpStatusCode.BadRequest, "Missing X-Know-Once Header!")
         return@applicationCall
       }
 

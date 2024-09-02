@@ -23,9 +23,9 @@ fun Route.authenticatedSingleLicenseRoutes() {
       return@post
     }
     call.applicationCall { applicationId, applicationName, application ->
-      val knowOnce = call.request.headers["Know-Once"]
+      val knowOnce = call.request.headers["X-Know-Once"]
       if (knowOnce == null) {
-        call.respond(HttpStatusCode.BadRequest, "Missing Know-Once Header!")
+        call.respond(HttpStatusCode.BadRequest, "Missing X-Know-Once Header!")
         return@applicationCall
       }
       val status = call.enumParameter<SingleLicenseStatus>("status")
@@ -48,9 +48,9 @@ fun Route.authenticatedSingleLicenseRoutes() {
       return@patch
     }
     call.applicationCall { applicationId, applicationName, application ->
-      val knowOnce = call.request.headers["Know-Once"]
+      val knowOnce = call.request.headers["X-Know-Once"]
       if (knowOnce == null) {
-        call.respond(HttpStatusCode.BadRequest, "Missing Know-Once Header!")
+        call.respond(HttpStatusCode.BadRequest, "Missing X-Know-Once Header!")
         return@applicationCall
       }
       val licenseId = call.longParameter("licenseId") ?: return@patch

@@ -6,6 +6,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -15,6 +16,8 @@ import ng.bossi.api.config.ConfigController
 import ng.bossi.api.database.DatabaseController
 import ng.bossi.api.http.routes.authenticated.initAuthenticatedRoutes
 import ng.bossi.api.http.routes.unauthenticated.initUnauthenticatedRoutes
+import ng.bossi.api.utils.RateLimits
+import ng.bossi.api.utils.register
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -61,6 +64,8 @@ suspend fun main() = coroutineScope {
           }
         }
       }
+      // See RateLimits
+      install(RateLimit) { RateLimits.entries.forEach { register(it) } }
     }.start(true)
   }
 
