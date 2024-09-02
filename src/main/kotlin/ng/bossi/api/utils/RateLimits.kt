@@ -5,7 +5,6 @@ import io.ktor.server.routing.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
-
 enum class RateLimits(val rateLimitName: RateLimitName, val limit: Int, val refillPeriod: Duration) {
     // Resource Download
     RESOURCES(RateLimitName("Resources"), 10, 30.minutes),
